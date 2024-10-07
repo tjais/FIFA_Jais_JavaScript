@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Example 05: OO-Programming</title>
+    <script src="data/teams_fifa22.js"></script>
+    <script src="data/players_fifa23.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #teams, #team_members {
+            width: 200px;
+            margin-bottom: 10px;
+        }
+        #player_img {
+            display: block;
+            margin-top: 20px;
+        }
+        #player_details {
+            margin-top: 20px;
+        }
+        #team_selection {
+            margin-top: 30px;
+        }
+        #team_selection h3 {
+            margin-bottom: 10px;
+        }
+        button {
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        select {
+            width: 150px;
+            margin-right: 20px;
+        }
+        #match_result {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>FIFA Team & Player Selection</h2>
+    <p>Press <b>F12</b> to see the results</p>
+
+    
+    <label for="teams">Select a team:</label>
+    <select id="teams" onchange="change_teams(event)">
+    </select>
+
+
+    <label for="team_members">Select a player:</label>
+    <select id="team_members"></select>
+
+
+    <img id="player_img" style="width: 150px; height: 150px;" alt="Player Image">
+
+    <div id="player_details">
+        <b>Player Age:</b> <span id="player_age"></span><br/>
+        <b>Player ID:</b> <span id="player_id"></span><br/>
+        <b>Player Nationality:</b> <span id="player_nationality"></span><br/>
+        <b>Player Flag:</b> <img id="player_flag" style="width: 30px; height: 20px;" alt="Flag">
+    </div>
+
+
+    <div id="team_selection">
+        <h3>Build Your Teams</h3>
+
+        <div>
+            <button onclick="addToTeam(1)">Add to Team 1</button>
+            <button onclick="addToTeam(2)">Add to Team 2</button>
+        </div>
+
+
+        <div>
+            <div style="display: inline-block; vertical-align: top;">
+                <h4>Team 1</h4>
+                <select id="team1" size="5"></select>
+            </div>
+
+            <div style="display: inline-block; vertical-align: top;">
+                <h4>Team 2</h4>
+                <select id="team2" size="5"></select>
+            </div>
+        </div>
+
+        <div>
+            <button onclick="removefromteam(1)">Remove from Team 1</button>
+            <button onclick="removefromteam(2)">Remove from Team 2</button>
+        </div>
+
+
+        <button onclick="simulateMatch()">Simulate Match</button>
+
+
+        <div id="match_result"></div>
+    </div>
+
+    <script>
+        function change_teams(e) {
+            let teams_sel = e.target;
+            let t = teams_sel.options[teams_sel.selectedIndex].text;
+
+            let team_members_sel = document.getElementById("team_members");
+            let current_players = players.filter(p => p.Club === t);
+
+            team_members_sel.innerHTML = "";
+            current_players.forEach(d => team_members_sel.add(new Option(d.Name, d.ID)));
+        }
+
+        function change_team_player(e) {
+            let player_sel = e.target;
+            let t = player_sel.options[player_sel.selectedIndex].text;
+
+            let curr_player = players.find(p => p.Name === t);
+            let player_img = document.getElementById("player_img");
+            document.getElementById("player_age").textContent = curr_player.Age;
+            document.getElementById("player_id").textContent = curr_player.ID;
+            document.getElementById("player_nationality").textContent = curr_player.Nationality;
+            document.getElementById("player_flag").src = curr_player.Flag;
+            player_img.src = curr_player.Photo;
+        }
+
+        function addToTeam(teamNumber) {
+            let selectedPlayer = document.getElementById("team_members").selectedOptions[0];
+
+            if (selectedPlayer) {
+                let teamSelect = document.getElementById(teamNumber === 1 ? "team1" : "team2");
+
+                for (let i = 0; i < teamSelect.options.length; i++) {
+                    if (teamSelect.options[i].value === selectedPlayer.value) {
+                        alert("Player is already in this team!");
+                        return;
+                    }
+                }
+
+                let newOption = new Option(selectedPlayer.text, selectedPlayer.value);
+                teamSelect.add(newOption);
+            } else {
+                alert("Please select a player to add!");
+            }
+        }
+
+        function removefromteam(teamNumberfordelete) {
+            let teamSelectfordelete = document.getElementById(teamNumberfordelete === 1 ? "team1" : "team2");
+            let selectedPlayer = teamSelectfordelete.selectedOptions[0];
+
+            if (selectedPlayer) {
+                teamSelectfordelete.remove(teamSelectfordelete.selectedIndex);
+            } else {
+                alert("Please select a player to remove from the team!");
+            }
+        }
+
+        function simulateMatch() {
+            let team1 = document.getElementById("team1");
+            let team2 = document.getElementById("team2");
+
+            if (team1.options.length === 0 || team2.options.length === 0) {
+                alert("Both teams must have at least one player to simulate the match!");
+                return;
+            }
+
+            let team1Strength = team1.options.length;
+            let team2Strength = team2.options.length;
+
+            let maxGoals = 5;
+            let team1Goals = Math.floor(Math.random() * (team1Strength + 1));
+            let team2Goals = Math.floor(Math.random() * (team2Strength + 1));
+
+            team1Goals = Math.min(team1Goals, maxGoals);
+            team2Goals = Math.min(team2Goals, maxGoals);
+
+            let resultText = "Final Score: Team 1 " + team1Goals + " - " + team2Goals + " Team 2";
+
+            document.getElementById("match_result").innerHTML = "<h4>" + resultText + "</h4>";
+        }
+
+        let teams_sel = document.getElementById("teams");
+        teams.forEach(d => teams_sel.add(new Option(d.Name, d.ID)));
+        teams_sel.addEventListener("change", change_teams);
+
+        let team_members_sel = document.getElementById("team_members");
+        team_members_sel.addEventListener("change", change_team_player);
+    </script>
+</body>
+</html>
